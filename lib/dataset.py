@@ -198,8 +198,8 @@ class MegaDepthDataset(Dataset):
             if not os.path.exists(scene_info_path):
                 continue
             scene_info = np.load(scene_info_path, allow_pickle=True)
-            overlap_matrix = scene_info['overlap_matrix']
-            scale_ratio_matrix = scene_info['scale_ratio_matrix']
+            overlap_matrix = scene_info['overlap_matrix'] # [K, K]
+            scale_ratio_matrix = scene_info['scale_ratio_matrix'] # [K, K]
 
             valid = np.logical_and(
                 np.logical_and(
@@ -209,17 +209,17 @@ class MegaDepthDataset(Dataset):
                 scale_ratio_matrix <= self.max_scale_ratio
             )
 
-            pairs = np.vstack(np.where(valid))
+            pairs = np.vstack(np.where(valid)) # 索引 [2, 可用关键点]
             try:
                 selected_ids = np.random.choice(
                     pairs.shape[1], self.pairs_per_scene
-                )
+                ) # 选中的关键点id的id [self.pairs_per_scene]
             except:
                 continue
 
             image_paths = scene_info['image_paths']
             depth_paths = scene_info['depth_paths']
-            points3D_id_to_2D = scene_info['points3D_id_to_2D']
+            points3D_id_to_2D = scene_info['points3D_id_to_2D'] # [K]
             points3D_id_to_ndepth = scene_info['points3D_id_to_ndepth']
             intrinsics = scene_info['intrinsics']
             poses = scene_info['poses']
@@ -230,7 +230,7 @@ class MegaDepthDataset(Dataset):
                 matches = np.array(list(
                     points3D_id_to_2D[idx1].keys() &
                     points3D_id_to_2D[idx2].keys()
-                ))
+                )) # match idx [m]
 
                 # Scale filtering
                 matches_nd1 = np.array([points3D_id_to_ndepth[idx1][match] for match in matches])
